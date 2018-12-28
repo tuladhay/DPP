@@ -99,7 +99,7 @@ def run(config):
             agent_actions = [ac.data.numpy() for ac in torch_agent_actions]
             # rearrange actions to be per environment
             actions = [[ac[i] for ac in agent_actions] for i in range(config.n_rollout_threads)]
-            next_obs, rewards, dones, infos = env.step(actions)
+            next_obs, rewards, dones, infos = env.step(actions, maddpg)
 
             '''
             Reward Shaping using D++, D.
@@ -112,7 +112,6 @@ def run(config):
             # DIFFERENCE REWARDS
             d_rewards = []
             for n in range(maddpg.nagents):
-                #print(rewards[0][n][1])
                 d_rewards.append([rewards[0][n][1]])
             d_rewards = [d_rewards]
             d_rewards = np.array(d_rewards)
@@ -179,16 +178,16 @@ if __name__ == '__main__':
     parser.add_argument("--n_rollout_threads", default=1, type=int)
     parser.add_argument("--n_training_threads", default=6, type=int)
     parser.add_argument("--buffer_length", default=int(1e6), type=int)
-    parser.add_argument("--n_episodes", default=25000, type=int)
-    parser.add_argument("--episode_length", default=50, type=int)
+    parser.add_argument("--n_episodes", default=20000, type=int)
+    parser.add_argument("--episode_length", default=60, type=int)
     parser.add_argument("--steps_per_update", default=100, type=int)
     parser.add_argument("--batch_size",
                         default=1024, type=int,
                         help="Batch size for model training")
-    parser.add_argument("--n_exploration_eps", default=25000, type=int)
+    parser.add_argument("--n_exploration_eps", default=20000, type=int)
     parser.add_argument("--init_noise_scale", default=0.2, type=float)
     parser.add_argument("--final_noise_scale", default=0.0, type=float)
-    parser.add_argument("--save_interval", default=500, type=int)
+    parser.add_argument("--save_interval", default=2000, type=int)
     parser.add_argument("--hidden_dim", default=64, type=int)
     parser.add_argument("--lr", default=0.01, type=float)
     parser.add_argument("--tau", default=0.01, type=float)
@@ -203,7 +202,7 @@ if __name__ == '__main__':
 
     config = parser.parse_args()
 
-    ########## INITIALIZE FROM SAVED MODEL #############
+    # INITIALIZE FROM SAVED MODEL ?
     init_from_saved = False
     config.discrete_action = False
     model_path = ""

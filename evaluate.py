@@ -44,7 +44,7 @@ def run(config):
             torch_actions = maddpg.step(torch_obs, explore=False)
             # convert actions to numpy arrays
             actions = [ac.data.numpy().flatten() for ac in torch_actions]
-            obs, rewards, dones, infos = env.step(actions)
+            obs, rewards, dones, infos = env.step(actions, maddpg)
             if config.save_gifs:
                 frames.append(env.render('rgb_array')[0])
             calc_end = time.time()
@@ -68,14 +68,14 @@ if __name__ == '__main__':
     parser.add_argument("--env_id", default="simple_spread", help="Name of environment")
     parser.add_argument("--model_name", default="Exp",
                         help="Name of model")
-    parser.add_argument("--run_num", default=200, type=int)
+    parser.add_argument("--run_num", default=15, type=int)
     parser.add_argument("--save_gifs", action="store_true",
                         help="Saves gif of each episode into model directory")
     parser.add_argument("--incremental", type=int,
                         help="Load incremental policy from given episode " +
                              "rather than final policy")
     parser.add_argument("--n_episodes", default=100, type=int)
-    parser.add_argument("--episode_length", default=45, type=int)
+    parser.add_argument("--episode_length", default=100, type=int)
     parser.add_argument("--fps", default=30, type=int)
 
     config = parser.parse_args()

@@ -73,9 +73,9 @@ class VecEnv(ABC):
         """
         pass
 
-    def step(self, actions):
+    def step(self, actions, policies):
         self.step_async(actions)
-        return self.step_wait()
+        return self.step_wait(policies)
 
     def render(self):
         logger.warn('Render not defined for %s'%self)
