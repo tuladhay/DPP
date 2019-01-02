@@ -173,6 +173,7 @@ class MADDPG(object):
         pol_loss = -curr_agent.critic(vf_in).mean()
         pol_loss += (curr_pol_out**2).mean() * 1e-3
         pol_loss.backward()
+        #pol_loss.backward(retain_graph=True)            # DONT know if this is correct
         if parallel:
             average_gradients(curr_agent.policy)
         torch.nn.utils.clip_grad_norm_(curr_agent.policy.parameters(), 0.5)
@@ -254,11 +255,12 @@ class MADDPG(object):
         for acsp, obsp, algtype in zip(env.action_space, env.observation_space,
                                        alg_types):
             num_in_pol = obsp.shape[0]
-            if isinstance(acsp, Box):
-                discrete_action = False
-                get_shape = lambda x: x.shape[0]
-            else:  # Discrete
-                discrete_action = True
+            discrete_action = False                               # I added this
+            # if isinstance(acsp, Box):
+            #     discrete_action = False
+            #     get_shape = lambda x: x.shape[0]
+            # else:  # Discrete
+            #     discrete_action = True
                 #get_shape = lambda x: x.n
             num_out_pol = 0
             for ac in acsp.spaces:                      # Replacement for the "get_shape" lambda function

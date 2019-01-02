@@ -1,11 +1,8 @@
 from __future__ import print_function
-import argparse
 import torch
 import torch.utils.data
 from torch import nn, optim
 from torch.nn import functional as F
-from torchvision import datasets, transforms
-from torchvision.utils import save_image
 
 
 class LayerNorm(nn.Module):
@@ -58,12 +55,9 @@ class VAE(nn.Module):
         return self.decode(z), mu, logvar
 
 
-# model = VAE().to(device)
-# optimizer = optim.Adam(model.parameters(), lr=1e-4)
-
-
 # Reconstruction + KL divergence losses summed over all elements and batch
 def loss_function(recon_x, x, mu, logvar):
+    # todo: won't work if x and recon_x are continuous. i.e., comm is continuous
     BCE = F.binary_cross_entropy(recon_x, x, size_average=False)
 
     # see Appendix B from VAE paper:
@@ -73,4 +67,3 @@ def loss_function(recon_x, x, mu, logvar):
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
 
     return BCE + KLD
-

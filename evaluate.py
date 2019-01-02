@@ -23,7 +23,8 @@ def run(config):
         gif_path.mkdir(exist_ok=True)
 
     maddpg = MADDPG.init_from_save(model_path)
-    env = make_env(config.env_id, discrete_action=maddpg.discrete_action)
+    #env = make_env(config.env_id, discrete_action=maddpg.discrete_action)
+    env = make_env(config.env_id, discrete_action=config.discrete_action)
     maddpg.prep_rollouts(device='cpu')
     ifi = 1 / config.fps  # inter-frame interval
 
@@ -68,7 +69,7 @@ if __name__ == '__main__':
     parser.add_argument("--env_id", default="simple_spread", help="Name of environment")
     parser.add_argument("--model_name", default="Exp",
                         help="Name of model")
-    parser.add_argument("--run_num", default=10, type=int)
+    parser.add_argument("--run_num", default=27, type=int)
     parser.add_argument("--save_gifs", action="store_true",
                         help="Saves gif of each episode into model directory")
     parser.add_argument("--incremental", type=int,
@@ -80,5 +81,5 @@ if __name__ == '__main__':
 
     config = parser.parse_args()
     config.save_gifs = False
-
+    config.discrete_action = False
     run(config)
