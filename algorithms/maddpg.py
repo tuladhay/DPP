@@ -258,16 +258,23 @@ class MADDPG(object):
                 get_shape = lambda x: x.shape[0]
             else:  # Discrete
                 discrete_action = True
-                get_shape = lambda x: x.n
-            num_out_pol = get_shape(acsp)
+                #get_shape = lambda x: x.n
+            num_out_pol = 0
+            for ac in acsp.spaces:                      # Replacement for the "get_shape" lambda function
+                num_out_pol += ac.shape[0]
+            #num_out_pol = get_shape(acsp)
             if algtype == "MADDPG":
                 num_in_critic = 0
                 for oobsp in env.observation_space:
                     num_in_critic += oobsp.shape[0]
-                for oacsp in env.action_space:
-                    num_in_critic += get_shape(oacsp)
+                for oacsp in env.action_space:          # Replacement
+                    for k in oacsp.spaces:
+                        num_in_critic += k.shape[0]
+                #for oacsp in env.action_space:
+                    #num_in_critic += get_shape(oacsp)
             else:
-                num_in_critic = obsp.shape[0] + get_shape(acsp)
+                num_in_critic = obsp.shape[0] + get_shape(acsp)     # this will cause error because of "get_shape"
+                print("Hope it doesn't encounter this line")
             agent_init_params.append({'num_in_pol': num_in_pol,
                                       'num_out_pol': num_out_pol,
                                       'num_in_critic': num_in_critic})

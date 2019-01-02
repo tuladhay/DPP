@@ -63,17 +63,23 @@ def run(config):
                                   tau=config.tau,
                                   lr=config.lr,
                                   hidden_dim=config.hidden_dim)
+
+    acsp_list = []
+    for oacsp in env.action_space:  # Replacement
+        num = 0
+        for k in oacsp.spaces:
+            num += (k.shape[0])
+        acsp_list.append(num)
+
     # used for learning (updates)
     replay_buffer = ReplayBuffer(config.buffer_length, maddpg.nagents,
                                  [obsp.shape[0] for obsp in env.observation_space],
-                                 [acsp.shape[0] if isinstance(acsp, Box) else acsp.n
-                                  for acsp in env.action_space])
+                                 acsp_list)
 
     # This is just to store the global rewards and not for updating the policies
     g_storage_buffer = ReplayBuffer(config.buffer_length, maddpg.nagents,
                                  [obsp.shape[0] for obsp in env.observation_space],
-                                 [acsp.shape[0] if isinstance(acsp, Box) else acsp.n
-                                 for acsp in env.action_space])
+                                 acsp_list)
 
     t = 0
     for ep_i in range(0, config.n_episodes, config.n_rollout_threads):
@@ -178,13 +184,13 @@ if __name__ == '__main__':
     parser.add_argument("--n_rollout_threads", default=1, type=int)
     parser.add_argument("--n_training_threads", default=6, type=int)
     parser.add_argument("--buffer_length", default=int(1e6), type=int)
-    parser.add_argument("--n_episodes", default=20000, type=int)
+    parser.add_argument("--n_episodes", default=50000, type=int)
     parser.add_argument("--episode_length", default=60, type=int)
     parser.add_argument("--steps_per_update", default=100, type=int)
     parser.add_argument("--batch_size",
                         default=1024, type=int,
                         help="Batch size for model training")
-    parser.add_argument("--n_exploration_eps", default=20000, type=int)
+    parser.add_argument("--n_exploration_eps", default=50000, type=int)
     parser.add_argument("--init_noise_scale", default=0.2, type=float)
     parser.add_argument("--final_noise_scale", default=0.0, type=float)
     parser.add_argument("--save_interval", default=2000, type=int)
