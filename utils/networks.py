@@ -1,20 +1,32 @@
 import torch.nn as nn
 import torch.nn.functional as F
+import utils.vae as vae
+from torch import nn, optim
+import numpy as np
+import torch
 
 class MLPNetwork(nn.Module):
     """
     MLP network (can be used as value or policy)
     """
     def __init__(self, input_dim, out_dim, hidden_dim=64, nonlin=F.relu,
-                 constrain_out=False, norm_in=True, discrete_action=True):
+                 constrain_out=False, norm_in=True, discrete_action=True,
+                 is_actor=False, comm_acs_space=None):
         """
         Inputs:
             input_dim (int): Number of dimensions in input
             out_dim (int): Number of dimensions in output
             hidden_dim (int): Number of hidden dimensions
             nonlin (PyTorch function): Nonlinearity to apply to hidden layers
+            is_actor (True/False): Needed to initialize VAE if MLP is for actor policy
         """
         super(MLPNetwork, self).__init__()
+
+        self.is_actor = is_actor
+        self.comm_acs_space = comm_acs_space
+
+        if is_actor:
+            out_dim = out_dim - comm_acs_space
 
         if norm_in:  # normalize inputs
             self.in_fn = nn.BatchNorm1d(input_dim)
@@ -33,6 +45,12 @@ class MLPNetwork(nn.Module):
         else:  # logits for discrete action (will softmax later)
             self.out_fn = lambda x: x
 
+        if is_actor:
+            self.vae_model = vae.VAE(input_dim, hidden_dim, comm_acs_space)
+            self.optimizer = optim.Adam(self.vae_model.parameters(), lr=1e-4)
+            self.layernorm = vae.LayerNorm
+            self.vae_loss = vae.loss_function
+
     def forward(self, X):
         """
         Inputs:
@@ -43,4 +61,16 @@ class MLPNetwork(nn.Module):
         h1 = self.nonlin(self.fc1(self.in_fn(X)))
         h2 = self.nonlin(self.fc2(h1))
         out = self.out_fn(self.fc3(h2))
-        return out
+
+        # comm
+        self.vae_model.train()
+        train_loss = 0
+        self.optimizer.zero_grad()
+        recon, mu, logvar = self.vae_model(X)
+        loss = self.vae_loss(recon, X, mu, logvar)
+        loss.backward()
+        train_loss += loss.item()
+        self.optimizer.step()
+        z = self.vae_model.z
+
+        return torch.cat((out, z), 1)

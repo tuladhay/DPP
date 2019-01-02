@@ -13,7 +13,7 @@ class MADDPG(object):
     """
     def __init__(self, agent_init_params, alg_types,
                  gamma=0.95, tau=0.01, lr=0.01, hidden_dim=64,
-                 discrete_action=False):
+                 discrete_action=False, comm_acs_space=2):
         """
         Inputs:
             agent_init_params (list of dict): List of dicts with parameters to
@@ -33,6 +33,7 @@ class MADDPG(object):
         self.alg_types = alg_types
         self.agents = [DDPGAgent(lr=lr, discrete_action=discrete_action,
                                  hidden_dim=hidden_dim,
+                                 comm_acs_space=comm_acs_space,
                                  **params)
                        for params in agent_init_params]
         self.agent_init_params = agent_init_params
@@ -282,7 +283,8 @@ class MADDPG(object):
                      'hidden_dim': hidden_dim,
                      'alg_types': alg_types,
                      'agent_init_params': agent_init_params,
-                     'discrete_action': discrete_action}
+                     'discrete_action': discrete_action,
+                     'comm_acs_space': env.action_space[0].spaces[1].shape[0]}      # for actor policy comm.
         instance = cls(**init_dict)
         instance.init_dict = init_dict
         return instance
