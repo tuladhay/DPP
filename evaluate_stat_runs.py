@@ -24,8 +24,9 @@ def run(config):
         gif_path.mkdir(exist_ok=True)
 
     # Model numbers in folder for stat runs
-    rrange = [1, 1001, 2001, 3001, 4001, 5001, 6001, 7001,
-              8001, 9001]
+    rrange = [1, 2001, 4001, 6001, 8001, 10001, 12001, 14001,
+              16001, 18001, 20001, 22001, 24001, 26001, 28001,
+              30001, 32001, 34001, 36001, 38001]
     stat_run_all_models = []
 
     for r in rrange:
@@ -90,14 +91,14 @@ if __name__ == '__main__':
     parser.add_argument("--env_id", default="simple_spread", help="Name of environment")
     parser.add_argument("--model_name", default="Exp",
                         help="Name of model")
-    parser.add_argument("--run_num", default=68, type=int)
+    parser.add_argument("--run_num", default=55, type=int)
     parser.add_argument("--save_gifs", action="store_true",
                         help="Saves gif of each episode into model directory")
     parser.add_argument("--incremental", default=None, type=int,
                         help="Load incremental policy from given episode " +
                              "rather than final policy")
     parser.add_argument("--n_episodes", default=15, type=int)
-    parser.add_argument("--episode_length", default=25, type=int)
+    parser.add_argument("--episode_length", default=60, type=int)
     parser.add_argument("--fps", default=30, type=int)
 
     config = parser.parse_args()
