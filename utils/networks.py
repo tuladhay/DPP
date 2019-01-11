@@ -22,6 +22,10 @@ class MLPNetwork(nn.Module):
             self.in_fn.bias.data.fill_(0)
         else:
             self.in_fn = lambda x: x
+
+        self.in_fn_cquery = lambda x: x
+        # so that for critic query we don't use batch norm. Can't use batch norm with one sample.
+
         self.fc1 = nn.Linear(input_dim, hidden_dim)
         self.fc2 = nn.Linear(hidden_dim, hidden_dim)
         self.fc3 = nn.Linear(hidden_dim, out_dim)
@@ -33,14 +37,18 @@ class MLPNetwork(nn.Module):
         else:  # logits for discrete action (will softmax later)
             self.out_fn = lambda x: x
 
-    def forward(self, X):
+    def forward(self, X, cquery=False):
         """
         Inputs:
             X (PyTorch Matrix): Batch of observations
         Outputs:
             out (PyTorch Matrix): Output of network (actions, values, etc)
         """
-        h1 = self.nonlin(self.fc1(self.in_fn(X)))
+        if cquery:
+            h1 = self.nonlin(self.fc1(self.in_fn_cquery(X)))
+        else:
+            h1 = self.nonlin(self.fc1(self.in_fn(X)))
+
         h2 = self.nonlin(self.fc2(h1))
         out = self.out_fn(self.fc3(h2))
         return out
