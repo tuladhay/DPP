@@ -105,7 +105,7 @@ def run(config):
             agent_actions = [ac.data.numpy() for ac in torch_agent_actions]
             # rearrange actions to be per environment
             actions = [[ac[i] for ac in agent_actions] for i in range(config.n_rollout_threads)]
-            next_obs, rewards, dones, infos = env.step(actions, maddpg)
+            next_obs, rewards, dones, infos = env.step(actions)
 
             '''
             Reward Shaping using D++, D.

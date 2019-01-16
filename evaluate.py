@@ -7,6 +7,7 @@ from pathlib import Path
 from torch.autograd import Variable
 from utils.make_env import make_env
 from algorithms.maddpg import MADDPG
+from neuroevolution.neuro_evolution import Evo
 
 
 def run(config):
@@ -22,6 +23,7 @@ def run(config):
         gif_path = model_path.parent / 'gifs'
         gif_path.mkdir(exist_ok=True)
 
+    evo = Evo.init_from_save(model_path)
     maddpg = MADDPG.init_from_save(model_path)
     #env = make_env(config.env_id, discrete_action=maddpg.discrete_action)
     env = make_env(config.env_id, discrete_action=config.discrete_action)

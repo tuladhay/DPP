@@ -58,7 +58,8 @@ class MLPNetwork(nn.Module):
         Outputs:
             out (PyTorch Matrix): Output of network (actions, values, etc)
         """
-        h1 = self.nonlin(self.fc1(self.in_fn(X)))
+        h1 = self.nonlin(self.fc1(self.in_fn(X[0][0])))
+        # h1 = self.nonlin(self.fc1(self.in_fn(X)))
         h2 = self.nonlin(self.fc2(h1))
         out = self.out_fn(self.fc3(h2))
 
