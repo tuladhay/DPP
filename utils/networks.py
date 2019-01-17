@@ -4,6 +4,7 @@ import utils.vae as vae
 from torch import nn, optim
 import numpy as np
 import torch
+from DPP.utils.misc import hard_update, gumbel_softmax, onehot_from_logits
 
 class MLPNetwork(nn.Module):
     """
@@ -24,6 +25,8 @@ class MLPNetwork(nn.Module):
 
         self.is_actor = is_actor
         self.comm_acs_space = comm_acs_space
+        if self.is_actor:
+            self.phy_acs_space = out_dim - comm_acs_space
 
         #if is_actor:
         #    out_dim = out_dim - comm_acs_space  # since out_dim is for physical action only
@@ -79,4 +82,8 @@ class MLPNetwork(nn.Module):
         #     # Thus, the gradient of z should be backpropagated to vae, and gradient of "out" to actor policy.
         #     return torch.cat((out, z), 1)
 
+        out_phy = out[:, :self.phy_acs_space]
+        out_comm = out[:, self.phy_acs_space:]
+        out_comm = gumbel_softmax(out_comm, hard=True)
+        out = torch.cat((out_phy, out_comm), 1)
         return out
